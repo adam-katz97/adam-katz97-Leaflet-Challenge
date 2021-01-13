@@ -4,21 +4,21 @@
 var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"
 
 d3.json(url, function (data) {
-  console.log(data)
-  
-var myMap = L.map("mapid", {
-  center: [37.09, -95.71],
-  zoom: 4
-});
+  console.log(data.features)
 
-L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
-  attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-  tileSize: 512,
-  maxZoom: 18,
-  zoomOffset: -1,
-  id: "mapbox/streets-v11",
-  accessToken: API_KEY
-}).addTo(myMap);
+  var myMap = L.map("mapid", {
+    center: [37.09, -95.71],
+    zoom: 4
+  });
+
+  L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: "mapbox/streets-v11",
+    accessToken: API_KEY
+  }).addTo(myMap);
   var depth = []
   var lat = []
   var lon = []
@@ -71,13 +71,57 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
       fillColor: color,
       // Adjust radius
       radius: data.features[n].properties.mag * 50000
-    }).bindPopup("<h1>" + data.features[n].properties.mag + "</h1>");
+    }).bindPopup("<h1>" + data.features[n].properties.mag + "</h1>").addTo(myMap);
     console.log(marker)
     mark.push(marker);
 
 
   }
-  
+  var info = L.control({
+    position: "bottomright",
+
+  });
+  info.onAdd = function () {
+    var div = L.DomUtil.create("div", "legend")
+
+
+    return div;
+  };
+  function getColor(d) {
+    return d > 4 ? '#008000' :
+      d > 3 ? '#FFA500' :
+        d > 2 ? '#FFFF00' :
+          d > 1 ? '#FF0000' :
+            '#800080';
+  }
+  //got the getColor function by altering code from leaflet geojson example page
+
+
+  info.addTo(myMap)
+  function updateLegend() {
+    document.querySelector(".legend").innerHTML = [
+      "<i style='background: " + getColor(5) + "'>__</i> " + "-10"+"<br>",
+      "<i style='background: " + getColor(4) + "'>__</i> " + "11-39"+"<br>",
+      "<i style='background: " + getColor(3) + "'>__</i> " + "40-69"+"<br>",
+      "<i style='background: " + getColor(2) + "'>__</i> " + "70-89"+"<br>",
+      "<i style='background: " + getColor(1) + "'>__</i> " + "90+"+"<br>"
+      
+
+
+
+    ].join("")
+    // [
+
+    //   "<p class='red'> : " + stationCount.OUT_OF_ORDER + "</p>",
+    //   "<p class='coming-soon'>Stations Coming Soon: " + stationCount.COMING_SOON + "</p>",
+    //   "<p class='empty'>Empty Stations: " + stationCount.EMPTY + "</p>",
+    //   "<p class='low'>Low Stations: " + stationCount.LOW + "</p>",
+    //   "<p class='healthy'>Healthy Stations: " + stationCount.NORMAL + "</p>"
+    // ].join("");
+  }
+  updateLegend()
+
+
 
 
 })
